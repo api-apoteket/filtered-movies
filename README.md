@@ -131,7 +131,7 @@ cd filtered-movies
 pip install requests
 
 # Set your API token
-export TMDB_API_KEY="eyJhbGciOiJIUzI1NiJ9.your_read_access_token_here"
+export TMDB_API_KEY="your_read_access_token_here"
 
 # Generate movie list
 python3 filter_movies.py

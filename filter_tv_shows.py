@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 """
-Fetch TV shows from TMDb and create two separate filtered lists.
+Fetch TV shows from TMDb and filter by network/prestige only.
 
-Filter 1 - Big Budget (estimated by episode count × type):
-  - High production value shows (regardless of rating)
-  - Current year onwards only
-
-Filter 2 - Highly Rated & Popular:
-  - Rating >= 7.5
-  - Vote count >= 100,000
-  - Current year onwards only
-
-Both lists are combined in one JSON file.
+Filter - Prestige TV:
+  - Shows from major networks/streamers (HBO, Netflix, Apple TV+, etc.)
+  - Premiered this year up to today
+  - Regardless of rating
 
 Required environment variable:
   TMDB_API_KEY - Your TMDb API Read Access Token (starts with "eyJ...")
@@ -36,20 +30,34 @@ if not API_KEY:
 
 OUTPUT_FILE = "filtered_tv_shows.json"
 
-# Filter 1: High value productions
-# TV shows don't have public budgets, so we use:
-# - High vote count AND high rating as proxy for "prestige" productions
-# - OR shows from networks known for big budgets (HBO, Netflix, Apple TV+, etc.)
-MIN_VOTES_PRESTIGE = 50000
-MIN_RATING_PRESTIGE = 7.0
+# Prestige networks/streamers (proxies for high production value)
 PRESTIGE_NETWORKS = [
-    "HBO", "Netflix", "Apple TV+", "Amazon", "Disney+",
-    "Paramount+", "Max", "Hulu", "Peacock"
+    "HBO",
+    "Netflix",
+    "Apple TV+",
+    "Amazon",
+    "Disney+",
+    "Paramount+",
+    "Max",
+    "Hulu",
+    "Peacock",
+    "Showtime",
+    "Starz",
+    "AMC",
+    "FX",
+    "National Geographic",
+    "BBC One",
+    "Sky Atlantic",
+    "Canal+",
+    "ZDF",
+    "Arte",
+    "Viaplay",
+    "TV4",
+    "SVT",
+    "NRK",
+    "DR",
+    "YLE"
 ]
-
-# Filter 2: Highly rated + popular
-MIN_RATING = 7.5
-MIN_VOTES = 100000
 
 # ===== TMDb API SETUP =====
 
@@ -65,25 +73,24 @@ HEADERS = {
 def get_tv_show_ids(pages=15):
     """
     Fetch TV show IDs from multiple TMDb lists.
-    Only includes shows from the current year onwards.
-    Returns a list of unique TV show IDs.
+    Only includes shows premiered this year up to today.
     """
     tv_ids = set()
     current_year = datetime.now().year
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    start_date_str = f"{current_year}-01-01"
 
-    # Standard endpoints
+    # Lists containing currently airing shows
     endpoints = [
-        "/tv/popular",
-        "/tv/top_rated",
         "/tv/on_the_air",
         "/tv/airing_today",
     ]
 
-    # Discover endpoints with built-in date filter
+    # Discover endpoints with strict date filter
     discover_endpoints = [
-        f"/discover/tv?sort_by=popularity.desc&first_air_date.gte={current_year}-01-01",
-        f"/discover/tv?sort_by=vote_average.desc&first_air_date.gte={current_year}-01-01&vote_count.gte=100",
-        f"/discover/tv?sort_by=first_air_date.desc&first_air_date.gte={current_year}-01-01",
+        f"/discover/tv?sort_by=popularity.desc&first_air_date.gte={start_date_str}&first_air_date.lte={today_str}",
+        f"/discover/tv?sort_by=vote_average.desc&first_air_date.gte={start_date_str}&first_air_date.lte={today_str}&vote_count.gte=10",
+        f"/discover/tv?sort_by=first_air_date.desc&first_air_date.gte={start_date_str}&first_air_date.lte={today_str}",
     ]
 
     all_endpoints = endpoints + discover_endpoints
@@ -101,15 +108,14 @@ def get_tv_show_ids(pages=15):
                 if response.status_code == 200:
                     data = response.json()
                     for show in data.get("results", []):
-                        # For discover endpoints, TMDb already filtered by year
                         if endpoint in endpoints:
                             first_air = show.get("first_air_date", "")
-                            if not first_air or first_air < f"{current_year}-01-01":
+                            if not first_air or first_air < start_date_str or first_air > today_str:
                                 continue
                         tv_ids.add(show["id"])
 
                 elif response.status_code == 401:
-                    print("ERROR: Invalid API key.")
+                    print("ERROR: Invalid API key. Please check your TMDB_API_KEY.")
                     sys.exit(1)
                 elif response.status_code == 429:
                     print("WARNING: Rate limit reached. Waiting 2 seconds...")
@@ -127,11 +133,7 @@ def get_tv_show_ids(pages=15):
 def simplify_show(show):
     """Create a simplified TV show object with relevant fields."""
     poster_path = show.get("poster_path")
-
-    # Get networks/production companies
     networks = [net["name"] for net in show.get("networks", [])]
-
-    # Get creators
     creators = [creator["name"] for creator in show.get("created_by", [])]
 
     return {
@@ -148,6 +150,7 @@ def simplify_show(show):
         "episode_runtime": show.get("episode_run_time", []),
         "rating": show.get("vote_average", 0),
         "votes": show.get("vote_count", 0),
+        "popularity": show.get("popularity", 0),
         "status": show.get("status"),
         "type": show.get("type"),
         "poster_url": f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None,
@@ -155,39 +158,29 @@ def simplify_show(show):
     }
 
 
-def is_prestige_production(show):
-    """Determine if a show is a high-value/prestige production."""
-    networks = show.get("networks", [])
+def is_prestige_show(show):
+    """Check if a show is from a prestige network/streamer."""
+    networks = [net.get("name", "") for net in show.get("networks", [])]
 
-    # Check if it's on a known prestige network
-    has_prestige_network = any(
-        any(prestige.lower() in network.lower() for prestige in PRESTIGE_NETWORKS)
-        for network in networks
-    )
+    for network in networks:
+        for prestige in PRESTIGE_NETWORKS:
+            if prestige.lower() in network.lower():
+                return True
 
-    # High vote count + good rating indicates significant investment
-    has_high_engagement = (
-        show.get("votes", 0) >= MIN_VOTES_PRESTIGE and
-        show.get("rating", 0) >= MIN_RATING_PRESTIGE
-    )
-
-    # Documentary or reality shows usually have lower budgets
-    genres = [g.lower() for g in show.get("genres", [])]
-    is_low_cost_genre = "documentary" in genres or "reality" in genres
-
-    return (has_prestige_network or has_high_engagement) and not is_low_cost_genre
+    return False
 
 
 def fetch_and_filter_shows(tv_ids):
     """
-    Fetch details for each TV show and sort into respective lists.
-    Only includes shows from the current year onwards.
-    Returns two lists: prestige and highly_rated.
+    Fetch details for each TV show.
+    Only keep shows from prestige networks.
+    Only includes shows premiered this year up to today.
     """
-    prestige = []
-    highly_rated = []
+    filtered = []
     total = len(tv_ids)
     current_year = datetime.now().year
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    start_date_str = f"{current_year}-01-01"
 
     for i, tv_id in enumerate(tv_ids):
         if i % 100 == 0:
@@ -207,32 +200,18 @@ def fetch_and_filter_shows(tv_ids):
                 continue
 
             show = response.json()
-
-            # Skip shows that started before current year
             first_air = show.get("first_air_date", "")
-            if not first_air or first_air < f"{current_year}-01-01":
+
+            # Strict date filter
+            if not first_air or first_air < start_date_str or first_air > today_str:
                 continue
 
-            rating = show.get("vote_average", 0)
-            votes = show.get("vote_count", 0)
-
-            # Skip shows without enough data
-            if votes == 0:
-                continue
-
-            simplified = simplify_show(show)
-
-            # Filter 1: Prestige productions
-            if is_prestige_production(show):
-                prestige.append(simplified)
-                networks_str = ", ".join(show.get("networks", ["Unknown"]))
-                print(f"  🎬 PRESTIGE: {show.get('name')} ({first_air}) - "
-                      f"Networks: {networks_str} - {rating} ({votes:,} votes)")
-
-            # Filter 2: Highly rated
-            if rating >= MIN_RATING and votes >= MIN_VOTES:
-                highly_rated.append(simplified)
-                print(f"  ⭐ HIGH RATED: {show.get('name')} ({first_air}) - {rating} ({votes:,} votes)")
+            # Prestige filter
+            if is_prestige_show(show):
+                simplified = simplify_show(show)
+                filtered.append(simplified)
+                networks_str = ", ".join([n["name"] for n in show.get("networks", [])])
+                print(f"  🎬 {show.get('name')} ({first_air}) - {networks_str}")
 
         except requests.exceptions.RequestException as e:
             print(f"  Request failed for TV show {tv_id}: {e}")
@@ -240,65 +219,44 @@ def fetch_and_filter_shows(tv_ids):
             print(f"  Unexpected error for TV show {tv_id}: {e}")
 
     # Sort by first air date (newest first)
-    prestige.sort(key=lambda x: x.get("first_air_date", ""), reverse=True)
-    highly_rated.sort(key=lambda x: x.get("first_air_date", ""), reverse=True)
-
-    return prestige, highly_rated
+    filtered.sort(key=lambda x: x.get("first_air_date", ""), reverse=True)
+    return filtered
 
 
 def main():
     current_year = datetime.now().year
+    today_str = datetime.now().strftime("%Y-%m-%d")
 
     print("=" * 60)
-    print("FILTERED TV SHOWS GENERATOR")
+    print("PRESTIGE TV SHOWS GENERATOR")
     print("=" * 60)
     print()
-    print(f"Year filter: {current_year} onwards only")
-    print()
-    print("Filter 1 - Prestige Productions:")
-    print(f"  High-value shows (premium networks OR strong engagement)")
-    print(f"  Networks: {', '.join(PRESTIGE_NETWORKS)}")
-    print(f"  OR Votes >= {MIN_VOTES_PRESTIGE:,} + Rating >= {MIN_RATING_PRESTIGE}")
-    print()
-    print("Filter 2 - Highly Rated & Popular:")
-    print(f"  Rating >= {MIN_RATING}")
-    print(f"  Votes >= {MIN_VOTES:,}")
+    print(f"Date filter: {current_year}-01-01 to {today_str}")
+    print(f"Network filter: {len(PRESTIGE_NETWORKS)} prestige networks/streamers")
     print()
 
     print("Fetching TV shows from TMDb...")
     tv_ids = get_tv_show_ids(pages=10)
     print(f"Found {len(tv_ids)} unique TV shows to evaluate.\n")
 
-    print("Analyzing and filtering...")
-    prestige, highly_rated = fetch_and_filter_shows(tv_ids)
+    print("Filtering by prestige networks...")
+    shows = fetch_and_filter_shows(tv_ids)
 
     output = {
         "metadata": {
             "generated": datetime.now(timezone.utc).isoformat(),
             "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
             "current_year": current_year,
+            "date_range": f"{current_year}-01-01 to {today_str}",
             "source": "TMDb API",
-            "note": "Only includes TV shows from current year onwards. TV budgets are not public, so 'prestige' is estimated by networks and engagement.",
-            "filters": {
-                "prestige": {
-                    "description": f"High-value productions from {current_year} (premium networks or strong engagement)",
-                    "prestige_networks": PRESTIGE_NETWORKS,
-                    "min_votes": MIN_VOTES_PRESTIGE,
-                    "min_rating": MIN_RATING_PRESTIGE,
-                    "year_from": current_year,
-                    "count": len(prestige)
-                },
-                "highly_rated": {
-                    "description": f"TV shows from {current_year} with rating >= {MIN_RATING} and >= {MIN_VOTES:,} votes",
-                    "min_rating": MIN_RATING,
-                    "min_votes": MIN_VOTES,
-                    "year_from": current_year,
-                    "count": len(highly_rated)
-                }
-            }
+            "note": "TV shows from prestige networks premiered this year to date.",
+            "filter": {
+                "prestige_networks": PRESTIGE_NETWORKS,
+                "description": f"TV shows from {current_year} on major networks/streamers"
+            },
+            "count": len(shows)
         },
-        "prestige": prestige,
-        "highly_rated": highly_rated
+        "shows": shows
     }
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
@@ -306,9 +264,8 @@ def main():
 
     print(f"\n{'=' * 60}")
     print("DONE!")
-    print(f"  Prestige productions:  {len(prestige)}")
-    print(f"  Highly rated shows:    {len(highly_rated)}")
-    print(f"  Output saved to:       {OUTPUT_FILE}")
+    print(f"  Prestige TV shows found: {len(shows)}")
+    print(f"  Output saved to: {OUTPUT_FILE}")
     print(f"{'=' * 60}")
 
 

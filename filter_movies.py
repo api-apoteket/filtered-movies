@@ -3,43 +3,57 @@
 Fetch movies from TMDb and create two separate filtered lists:
 
 Filter 1 - Big Budget:
-  - Budget >= $100,000,000 (oavsett betyg)
+  - Budget >= $100,000,000 (regardless of rating)
 
 Filter 2 - Highly Rated & Popular:
   - Rating >= 7.5
   - Vote count >= 100,000
 
 Both lists are combined in one JSON file.
+
+Required environment variable:
+  TMDB_API_KEY - Your TMDb API key (v3 auth or bearer token)
 """
 
 import requests
 import json
 import os
-from datetime import datetime
+import sys
+from datetime import datetime, timezone
+
 
 # ===== CONFIGURATION =====
-API_KEY = os.environ.get("TMDB_API_KEY", "f5d28f2fe1608ca116551f0aa167bfdd")
+
+# API key from environment variable (NEVER hardcode secrets)
+API_KEY = os.environ.get("TMDB_API_KEY")
+if not API_KEY:
+    print("ERROR: Environment variable TMDB_API_KEY is not set.")
+    print("       Set it with: export TMDB_API_KEY='your_key_here'")
+    sys.exit(1)
+
 OUTPUT_FILE = "filtered_movies.json"
 
-# Filter 1: Big budget (oavsett rating)
+# Filter 1: Big budget (regardless of rating)
 MIN_BUDGET = 100_000_000  # $100M
 
 # Filter 2: Highly rated + popular
 MIN_RATING = 7.5
 MIN_VOTES = 100_000
 
-# ===== TMDb API ENDPOINTS =====
+# ===== TMDb API SETUP =====
+
 BASE_URL = "https://api.themoviedb.org/3"
 HEADERS = {
     "accept": "application/json",
     "Authorization": f"Bearer {API_KEY}"
 }
 
+# ===== FUNCTIONS =====
 
 def get_movie_ids(pages=15):
     """
-    Hämtar filmer från flera TMDb-listor för bred täckning.
-    Returnerar en lista med unika film-ID:n.
+    Fetch movie IDs from multiple TMDb lists for broad coverage.
+    Returns a list of unique movie IDs.
     """
     movie_ids = set()
 
@@ -59,20 +73,33 @@ def get_movie_ids(pages=15):
             else:
                 url = f"{BASE_URL}{endpoint}?page={page}"
 
-            response = requests.get(url, headers=HEADERS)
+            try:
+                response = requests.get(url, headers=HEADERS, timeout=30)
 
-            if response.status_code == 200:
-                data = response.json()
-                for movie in data.get("results", []):
-                    movie_ids.add(movie["id"])
-            else:
-                print(f"Varning: Kunde inte hämta {url} (status {response.status_code})")
+                if response.status_code == 200:
+                    data = response.json()
+                    for movie in data.get("results", []):
+                        movie_ids.add(movie["id"])
+                elif response.status_code == 401:
+                    print("ERROR: Invalid API key. Please check your TMDB_API_KEY.")
+                    sys.exit(1)
+                elif response.status_code == 429:
+                    print("WARNING: Rate limit reached. Waiting before retrying...")
+                    import time
+                    time.sleep(2)
+                else:
+                    print(f"WARNING: Could not fetch {url} (HTTP {response.status_code})")
+
+            except requests.exceptions.RequestException as e:
+                print(f"WARNING: Request failed for {url}: {e}")
 
     return list(movie_ids)
 
 
 def simplify_movie(movie):
-    """Skapar ett förenklat filmobjekt med relevant data."""
+    """
+    Create a simplified movie object with relevant fields.
+    """
     poster_path = movie.get("poster_path")
     return {
         "title": movie.get("title"),
@@ -91,19 +118,29 @@ def simplify_movie(movie):
 
 def fetch_and_filter_movies(movie_ids):
     """
-    Hämtar detaljer för varje film och sorterar in i respektive lista.
+    Fetch details for each movie and sort into respective lists.
+    Returns two lists: big_budget and highly_rated.
     """
     big_budget = []
     highly_rated = []
+    total = len(movie_ids)
 
     for i, movie_id in enumerate(movie_ids):
+        # Progress indicator every 100 movies
         if i % 100 == 0:
-            print(f"  Bearbetar film {i+1}/{len(movie_ids)}...")
+            print(f"  Processing movie {i+1}/{total}...")
 
         url = f"{BASE_URL}/movie/{movie_id}"
 
         try:
-            response = requests.get(url, headers=HEADERS)
+            response = requests.get(url, headers=HEADERS, timeout=30)
+
+            if response.status_code == 429:
+                print("  Rate limited. Waiting...")
+                import time
+                time.sleep(2)
+                response = requests.get(url, headers=HEADERS, timeout=30)
+
             if response.status_code != 200:
                 continue
 
@@ -112,26 +149,28 @@ def fetch_and_filter_movies(movie_ids):
             rating = movie.get("vote_average", 0)
             votes = movie.get("vote_count", 0)
 
-            # Hoppa över filmer utan budgetdata
+            # Skip movies without budget data
             if budget == 0:
                 continue
 
             simplified = simplify_movie(movie)
 
-            # Filter 1: Big budget (oavsett rating/röster)
+            # Filter 1: Big budget (regardless of rating/votes)
             if budget >= MIN_BUDGET:
                 big_budget.append(simplified)
                 print(f"  💰 BIG BUDGET: {movie.get('title')} - ${budget:,}")
 
-            # Filter 2: Högt betyg + många röster
+            # Filter 2: High rating + many votes
             if rating >= MIN_RATING and votes >= MIN_VOTES:
                 highly_rated.append(simplified)
                 print(f"  ⭐ HIGH RATED: {movie.get('title')} - {rating} ({votes:,} votes)")
 
+        except requests.exceptions.RequestException as e:
+            print(f"  Request failed for movie {movie_id}: {e}")
         except Exception as e:
-            print(f"  Fel vid film {movie_id}: {e}")
+            print(f"  Unexpected error for movie {movie_id}: {e}")
 
-    # Sortera efter releasedatum (nyast först)
+    # Sort by release date (newest first)
     big_budget.sort(key=lambda x: x.get("release_date", ""), reverse=True)
     highly_rated.sort(key=lambda x: x.get("release_date", ""), reverse=True)
 
@@ -143,31 +182,30 @@ def main():
     print("🎬 FILTERED MOVIES GENERATOR")
     print("=" * 60)
     print()
-    print("📋 Filter 1 - Big Budget:")
-    print(f"   Budget ≥ ${MIN_BUDGET:,} (oavsett betyg/röster)")
+    print("Filter 1 - Big Budget:")
+    print(f"  Budget ≥ ${MIN_BUDGET:,} (regardless of rating/votes)")
     print()
-    print("📋 Filter 2 - Highly Rated & Popular:")
-    print(f"   Rating ≥ {MIN_RATING}")
-    print(f"   Votes ≥ {MIN_VOTES:,}")
+    print("Filter 2 - Highly Rated & Popular:")
+    print(f"  Rating ≥ {MIN_RATING}")
+    print(f"  Votes ≥ {MIN_VOTES:,}")
     print()
 
-    print("🔍 Hämtar filmer från TMDb...")
+    print("Fetching movies from TMDb...")
     movie_ids = get_movie_ids(pages=10)
-    print(f"📊 Hittade {len(movie_ids)} unika filmer att utvärdera.\n")
+    print(f"Found {len(movie_ids)} unique movies to evaluate.\n")
 
-    print("🔎 Analyserar och filtrerar...")
+    print("Analyzing and filtering...")
     big_budget, highly_rated = fetch_and_filter_movies(movie_ids)
 
-    # Bygg utdata
+    # Build output structure
     output = {
         "metadata": {
-            "generated": datetime.utcnow().isoformat() + "Z",
-            "last_updated": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+            "generated": datetime.now(timezone.utc).isoformat(),
+            "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
             "source": "TMDb API",
-            "note": "Data from The Movie Database. Budget figures may be estimates.",
             "filters": {
                 "big_budget": {
-                    "description": "Movies with budget ≥ $100M (regardless of rating)",
+                    "description": f"Movies with budget ≥ ${MIN_BUDGET:,} (regardless of rating)",
                     "min_budget": MIN_BUDGET,
                     "count": len(big_budget)
                 },
@@ -183,15 +221,15 @@ def main():
         "highly_rated": highly_rated
     }
 
-    # Spara till fil
+    # Write to file
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
     print(f"\n{'=' * 60}")
-    print(f"✅ KLART!")
-    print(f"   💰 Big budget-filmer:  {len(big_budget)} st")
-    print(f"   ⭐ Högt rankade filmer: {len(highly_rated)} st")
-    print(f"   📁 Sparade i: {OUTPUT_FILE}")
+    print("DONE!")
+    print(f"  💰 Big budget movies:   {len(big_budget)}")
+    print(f"  ⭐ Highly rated movies:  {len(highly_rated)}")
+    print(f"  📁 Output saved to:      {OUTPUT_FILE}")
     print(f"{'=' * 60}")
 
 

@@ -34,7 +34,7 @@ jobs:
           git stash
           git pull --rebase origin main
           git stash pop
-          git add filtered_tv_shows.json
+          git add filtered_tv_shows.json filtered_tv_shows_sonarr.json
           if ! git diff --cached --quiet; then
             git commit -m "Update filtered TV shows [skip ci]"
             git push

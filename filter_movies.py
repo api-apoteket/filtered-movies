@@ -6,6 +6,10 @@ Filter - Big Budget:
   - Budget >= $100,000,000 (regardless of rating)
   - Released this year up to today
 
+Outputs:
+  - filtered_movies.json      (with metadata wrapper)
+  - filtered_movies_radarr.json (pure array, Radarr-compatible)
+
 Required environment variable:
   TMDB_API_KEY - Your TMDb API Read Access Token (starts with "eyJ...")
 """
@@ -28,6 +32,7 @@ if not API_KEY:
     sys.exit(1)
 
 OUTPUT_FILE = "filtered_movies.json"
+RADARR_FILE = "filtered_movies_radarr.json"
 
 # Filter: Big budget (regardless of rating)
 MIN_BUDGET = 100_000_000  # $100M
@@ -198,6 +203,7 @@ def main():
     print("Filtering by budget...")
     movies = fetch_and_filter_movies(movie_ids)
 
+    # Save full metadata version
     output = {
         "metadata": {
             "generated": datetime.now(timezone.utc).isoformat(),
@@ -218,10 +224,15 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
+    # Save Radarr-compatible version (pure array, no wrapper)
+    with open(RADARR_FILE, "w", encoding="utf-8") as f:
+        json.dump(movies, f, indent=2, ensure_ascii=False)
+
     print(f"\n{'=' * 60}")
     print("DONE!")
     print(f"  Big budget movies found: {len(movies)}")
-    print(f"  Output saved to: {OUTPUT_FILE}")
+    print(f"  Full metadata:           {OUTPUT_FILE}")
+    print(f"  Radarr-ready:            {RADARR_FILE}")
     print(f"{'=' * 60}")
 
 

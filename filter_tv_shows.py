@@ -7,6 +7,10 @@ Filter - Prestige TV:
   - Premiered this year up to today
   - Regardless of rating
 
+Outputs:
+  - filtered_tv_shows.json        (with metadata wrapper)
+  - filtered_tv_shows_sonarr.json (pure array, Sonarr-compatible)
+
 Required environment variable:
   TMDB_API_KEY - Your TMDb API Read Access Token (starts with "eyJ...")
 """
@@ -29,6 +33,7 @@ if not API_KEY:
     sys.exit(1)
 
 OUTPUT_FILE = "filtered_tv_shows.json"
+SONARR_FILE = "filtered_tv_shows_sonarr.json"
 
 # Prestige networks/streamers (proxies for high production value)
 PRESTIGE_NETWORKS = [
@@ -242,6 +247,7 @@ def main():
     print("Filtering by prestige networks...")
     shows = fetch_and_filter_shows(tv_ids)
 
+    # Save full metadata version
     output = {
         "metadata": {
             "generated": datetime.now(timezone.utc).isoformat(),
@@ -262,10 +268,15 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
+    # Save Sonarr-compatible version (pure array, no wrapper)
+    with open(SONARR_FILE, "w", encoding="utf-8") as f:
+        json.dump(shows, f, indent=2, ensure_ascii=False)
+
     print(f"\n{'=' * 60}")
     print("DONE!")
     print(f"  Prestige TV shows found: {len(shows)}")
-    print(f"  Output saved to: {OUTPUT_FILE}")
+    print(f"  Full metadata:           {OUTPUT_FILE}")
+    print(f"  Sonarr-ready:            {SONARR_FILE}")
     print(f"{'=' * 60}")
 
 

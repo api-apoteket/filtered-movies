@@ -34,7 +34,7 @@ jobs:
           git stash
           git pull --rebase origin main
           git stash pop
-          git add filtered_movies.json
+          git add filtered_movies.json filtered_movies_radarr.json
           if ! git diff --cached --quiet; then
             git commit -m "Update filtered movies [skip ci]"
             git push

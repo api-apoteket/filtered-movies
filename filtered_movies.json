@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "generated": "2026-05-08T19:37:46.242275+00:00",
-    "last_updated": "2026-05-08 19:37 UTC",
+    "generated": "2026-05-08T20:08:57.013580+00:00",
+    "last_updated": "2026-05-08 20:08 UTC",
     "current_year": 2026,
     "date_range": "2026-01-01 to 2026-05-08",
     "source": "TMDb API",
@@ -24,8 +24,8 @@
       ],
       "budget": 100000000,
       "revenue": 247665198,
-      "rating": 6.764,
-      "votes": 348,
+      "rating": 6.773,
+      "votes": 354,
       "popularity": 173.3912,
       "poster_url": "https://image.tmdb.org/t/p/w500/xTI42pmsP5EDnvsNJPEDubwWBQO.jpg",
       "overview": "Andy Sachs returns to Runway as Miranda Priestly navigates a new media landscape and Runway's position within. The duo reconnect with former assistant Emily Charlton, now the head of a luxury brand that possesses funding which could ensure Runway's survival."

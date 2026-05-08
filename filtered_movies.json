@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "generated": "2026-05-08T20:08:57.013580+00:00",
-    "last_updated": "2026-05-08 20:08 UTC",
+    "generated": "2026-05-08T21:00:18.390729+00:00",
+    "last_updated": "2026-05-08 21:00 UTC",
     "current_year": 2026,
     "date_range": "2026-01-01 to 2026-05-08",
     "source": "TMDb API",
@@ -79,8 +79,8 @@
       ],
       "budget": 110000000,
       "revenue": 898795175,
-      "rating": 6.729,
-      "votes": 757,
+      "rating": 6.732,
+      "votes": 763,
       "popularity": 443.9285,
       "poster_url": "https://image.tmdb.org/t/p/w500/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
       "overview": "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade."

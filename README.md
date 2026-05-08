@@ -177,7 +177,7 @@ All movie and TV show data comes from The Movie Database (TMDb). This product us
 
 📄 License
 
-MIT – See LICENSE for details.
+MIT – See [MIT License](LICENSE) for details.
 
 🙏 Attribution
 

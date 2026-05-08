@@ -1,0 +1,313 @@
+{
+  "metadata": {
+    "generated": "2026-05-08T19:05:04.744269+00:00",
+    "last_updated": "2026-05-08 19:05 UTC",
+    "current_year": 2026,
+    "source": "TMDb API",
+    "note": "Only includes movies from current year onwards.",
+    "filters": {
+      "big_budget": {
+        "description": "Movies from 2026 with budget >= $100,000,000 (regardless of rating)",
+        "min_budget": 100000000,
+        "year_from": 2026,
+        "count": 17
+      },
+      "highly_rated": {
+        "description": "Movies from 2026 with rating >= 7.5 and >= 100,000 votes",
+        "min_rating": 7.5,
+        "min_votes": 100000,
+        "year_from": 2026,
+        "count": 0
+      }
+    }
+  },
+  "big_budget": [
+    {
+      "title": "The Beatles: John",
+      "tmdb_id": 1247601,
+      "imdb_id": "tt31419912",
+      "release_date": "2028-04-05",
+      "genres": [
+        "Drama",
+        "Music"
+      ],
+      "budget": 100000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/lx8XZ4HvfEZd82M2YuJUy6qNSUR.jpg",
+      "overview": "One of four biopics, focusing on individual members of The Beatles, this one telling the story of the group from the perspective of John Lennon."
+    },
+    {
+      "title": "The Beatles: George",
+      "tmdb_id": 1247603,
+      "imdb_id": "tt31419914",
+      "release_date": "2028-04-05",
+      "genres": [
+        "Drama",
+        "Music"
+      ],
+      "budget": 100000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/8CYUp3jCSc86WvkLRGAQcepImeV.jpg",
+      "overview": "One of four biopics, focusing on individual members of The Beatles, this one telling the story of the group from the perspective of George Harrison."
+    },
+    {
+      "title": "The Beatles: Paul",
+      "tmdb_id": 1247605,
+      "imdb_id": "tt31419913",
+      "release_date": "2028-04-05",
+      "genres": [
+        "Drama",
+        "Music"
+      ],
+      "budget": 100000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/cT39aUoRyitmhbB45w5UFKhBRIW.jpg",
+      "overview": "One of four biopics, focusing on individual members of The Beatles, this one telling the story of the group from the perspective of Paul McCartney."
+    },
+    {
+      "title": "The Beatles: Ringo",
+      "tmdb_id": 1247606,
+      "imdb_id": "tt31419915",
+      "release_date": "2028-04-05",
+      "genres": [
+        "Drama",
+        "Music"
+      ],
+      "budget": 100000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/ovDjgp1ZBDvLY3Yrh6s7qS8Zxgy.jpg",
+      "overview": "One of four biopics, focusing on individual members of The Beatles, this one telling the story of the group from the perspective of Ringo Starr."
+    },
+    {
+      "title": "Untitled Daniels Film",
+      "tmdb_id": 1651461,
+      "imdb_id": "tt31637517",
+      "release_date": "2027-11-19",
+      "genres": [
+        "Science Fiction",
+        "Action",
+        "Comedy"
+      ],
+      "budget": 150000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": null,
+      "overview": "Described as a \"very existential\" and \"fun sci-fi, action comedy with a big heart\". Plot TBA."
+    },
+    {
+      "title": "Man of Tomorrow",
+      "tmdb_id": 1523140,
+      "imdb_id": "tt37833661",
+      "release_date": "2027-07-07",
+      "genres": [
+        "Action",
+        "Science Fiction",
+        "Adventure"
+      ],
+      "budget": 330000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/dmRLQgs6zqkxKpOHlYkEaIVtOA1.jpg",
+      "overview": "Superman and Lex Luthor team up to face a larger threat. Plot TBA."
+    },
+    {
+      "title": "The Odyssey",
+      "tmdb_id": 1368337,
+      "imdb_id": "tt33764258",
+      "release_date": "2026-07-15",
+      "genres": [
+        "Adventure",
+        "Action",
+        "Fantasy"
+      ],
+      "budget": 250000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/2jzjE3OtXekGtn3vdRGXpyWrHe7.jpg",
+      "overview": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point."
+    },
+    {
+      "title": "Masters of the Universe",
+      "tmdb_id": 454639,
+      "imdb_id": "tt0427340",
+      "release_date": "2026-06-03",
+      "genres": [
+        "Action",
+        "Fantasy",
+        "Science Fiction"
+      ],
+      "budget": 200000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/nm2ianYVp7OXElUZVeeAbNTqBLr.jpg",
+      "overview": "After being separated for 15 years, the Sword of Power leads Prince Adam back to Eternia, where he discovers his home shattered under the fiendish rule of Skeletor. To save his family and his world, Adam must join forces with his closest allies, Teela and Duncan/Man-At-Arms, and embrace his true destiny as He-Man — the most powerful man in the universe."
+    },
+    {
+      "title": "Star Wars: The Mandalorian and Grogu",
+      "tmdb_id": 1228710,
+      "imdb_id": "tt30825738",
+      "release_date": "2026-05-20",
+      "genres": [
+        "Adventure",
+        "Science Fiction",
+        "Action"
+      ],
+      "budget": 165000000,
+      "revenue": 0,
+      "rating": 0.0,
+      "votes": 0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/fsSMj6TJ6qtMnpg6UIw8TzUeEyE.jpg",
+      "overview": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the Rebellion fought for, they have enlisted the help of legendary Mandalorian bounty hunter Din Djarin and his young apprentice Grogu."
+    },
+    {
+      "title": "The Devil Wears Prada 2",
+      "tmdb_id": 1314481,
+      "imdb_id": "tt33612209",
+      "release_date": "2026-04-29",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "budget": 100000000,
+      "revenue": 247665198,
+      "rating": 6.764,
+      "votes": 348,
+      "poster_url": "https://image.tmdb.org/t/p/w500/xTI42pmsP5EDnvsNJPEDubwWBQO.jpg",
+      "overview": "Andy Sachs returns to Runway as Miranda Priestly navigates a new media landscape and Runway's position within. The duo reconnect with former assistant Emily Charlton, now the head of a luxury brand that possesses funding which could ensure Runway's survival."
+    },
+    {
+      "title": "Desert Warrior",
+      "tmdb_id": 898704,
+      "imdb_id": "tt13570066",
+      "release_date": "2026-04-23",
+      "genres": [
+        "Action",
+        "Drama",
+        "History"
+      ],
+      "budget": 150000000,
+      "revenue": 0,
+      "rating": 6.0,
+      "votes": 2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/3JHYiYhOPoME3E5pscYpE4dQfbT.jpg",
+      "overview": "In seventh-century Arabia, Princess Hind defies her fate, refusing to become a concubine to the ruthless Emperor Kisra. Fleeing into the desert with her father, she is hunted by a merciless army and forced to trust a legendary bandit with secrets of his own. Rising from fugitive to fearless warrior, Hind unites warring tribes for a final stand - the Battle of Dhi Qar, a clash that will change history forever."
+    },
+    {
+      "title": "Michael",
+      "tmdb_id": 936075,
+      "imdb_id": "tt11378946",
+      "release_date": "2026-04-22",
+      "genres": [
+        "Music",
+        "Drama"
+      ],
+      "budget": 250000000,
+      "revenue": 443296059,
+      "rating": 7.56,
+      "votes": 553,
+      "poster_url": "https://image.tmdb.org/t/p/w500/3Qud19bBUrrJAzy0Ilm8gRJlJXP.jpg",
+      "overview": "The story of Michael Jackson, one of the most influential artists the world has ever known, and his life beyond the music. His journey from the discovery of his extraordinary talent as the lead of the Jackson Five, to the visionary artist whose creative ambition fueled a relentless pursuit to become the biggest entertainer in the world, highlighting both his life off-stage and some of the most iconic performances from his early solo career."
+    },
+    {
+      "title": "The Super Mario Galaxy Movie",
+      "tmdb_id": 1226863,
+      "imdb_id": "tt28650488",
+      "release_date": "2026-04-01",
+      "genres": [
+        "Family",
+        "Comedy",
+        "Adventure",
+        "Fantasy",
+        "Animation"
+      ],
+      "budget": 110000000,
+      "revenue": 898795175,
+      "rating": 6.729,
+      "votes": 757,
+      "poster_url": "https://image.tmdb.org/t/p/w500/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
+      "overview": "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade."
+    },
+    {
+      "title": "Project Hail Mary",
+      "tmdb_id": 687163,
+      "imdb_id": "tt12042730",
+      "release_date": "2026-03-15",
+      "genres": [
+        "Science Fiction",
+        "Adventure"
+      ],
+      "budget": 200000000,
+      "revenue": 640469765,
+      "rating": 8.203,
+      "votes": 1960,
+      "poster_url": "https://image.tmdb.org/t/p/w500/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
+      "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction."
+    },
+    {
+      "title": "Hoppers",
+      "tmdb_id": 1327819,
+      "imdb_id": "tt26443616",
+      "release_date": "2026-03-04",
+      "genres": [
+        "Adventure",
+        "Animation",
+        "Comedy",
+        "Family",
+        "Science Fiction"
+      ],
+      "budget": 150000000,
+      "revenue": 380239139,
+      "rating": 7.739,
+      "votes": 759,
+      "poster_url": "https://image.tmdb.org/t/p/w500/xjtWQ2CL1mpmMNwuU5HeS4Iuwuu.jpg",
+      "overview": "Scientists have discovered how to 'hop' human consciousness into lifelike robotic animals, allowing people to communicate with animals as animals. Animal lover Mabel seizes an opportunity to use the technology, uncovering mysteries within the animal world beyond anything she could have imagined."
+    },
+    {
+      "title": "Blades of the Guardians: Wind Rises in the Desert",
+      "tmdb_id": 1305781,
+      "imdb_id": "tt32649961",
+      "release_date": "2026-02-17",
+      "genres": [
+        "Action",
+        "Drama",
+        "History"
+      ],
+      "budget": 123000000,
+      "revenue": 203356793,
+      "rating": 7.1,
+      "votes": 36,
+      "poster_url": "https://image.tmdb.org/t/p/w500/AbunjMKX4P1sDNlKfhYrWkIoRD9.jpg",
+      "overview": "Dao Ma, the \"second most wanted fugitive,\" is entrusted by his benefactor, the chief of Mo family clan, to take on a mysterious escort mission-escorting the \"most wanted fugitive\" to Chang'an."
+    },
+    {
+      "title": "The Rip",
+      "tmdb_id": 1306368,
+      "imdb_id": "tt32642706",
+      "release_date": "2026-01-13",
+      "genres": [
+        "Action",
+        "Thriller",
+        "Crime"
+      ],
+      "budget": 100000000,
+      "revenue": 0,
+      "rating": 7.051,
+      "votes": 1555,
+      "poster_url": "https://image.tmdb.org/t/p/w500/eZo31Dhl5BQ6GfbMNf3oU0tUvPZ.jpg",
+      "overview": "Trust frays when a team of Miami cops discovers millions in cash inside a run-down stash house, calling everyone — and everything — into question."
+    }
+  ],
+  "highly_rated": []
+}

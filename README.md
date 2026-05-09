@@ -9,7 +9,7 @@ Two JSON files, updated daily via GitHub Actions, ready for direct import:
 | File | For | Filter |
 |------|-----|--------|
 | `filtered_movies_radarr.json` | Radarr | Movies with budget ≥ $100,000,000 |
-| `filtered_tv_shows_sonarr.json` | Sonarr | TV shows from prestige networks/streamers |
+| `filtered_tv_shows_sonarr.json` | Sonarr | TV shows from top-tier networks/streamers |
 
 ### 💰 Movies – Big Budget Only
 
@@ -21,20 +21,30 @@ No rating requirements. A flop with a $200M budget qualifies just as much as an 
 
 Every TV show that premiered this year on a major network or streaming service.
 
-Prestige networks include: HBO, Netflix, Apple TV+, Amazon Prime Video, Disney+, Paramount+, Max, Hulu, Peacock, Showtime, Starz, AMC, FX, BBC One, Sky Atlantic, Viaplay, SVT, TV4, NRK, DR, YLE, and more.
+**Current networks:**
+| Network | Type |
+|---------|------|
+| Netflix | Streaming |
+| Amazon | Streaming (Prime Video) |
+| Disney+ | Streaming |
+| Paramount+ | Streaming (CBS, Showtime, Nickelodeon, MTV) |
+| HBO / Max | Premium TV & Streaming |
+| Hulu | Streaming (FX, originals) |
+| Apple TV+ | Premium Streaming |
+| National Geographic | Documentary & Factual |
 
-No rating requirements. If it's on a serious platform, it's on the list.
+No rating requirements. If it's on a top-tier platform, it's on the list.
 
 ## 🚀 Direct URLs for Radarr & Sonarr
 
-**Radarr (Movies):**
+**Radarr (StevenLu Custom):**
 ```
 
 https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_movies_radarr.json
 
 ```
 
-**Sonarr (TV Shows):**
+**Sonarr (Custom List):**
 ```
 
 https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_shows_sonarr.json
@@ -46,55 +56,42 @@ https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_
 ### Radarr (Movies)
 
 1. Go to **Settings → Import Lists → +**
-2. Choose **Custom Lists → Radarr Lists**
+2. Choose **StevenLu Custom**
 3. Set **URL** to: `https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_movies_radarr.json`
-4. Set **JSON Path** to: `$`
-5. Click **Test** and then **Save**
+4. Click **Test** and then **Save**
 
 ### Sonarr (TV Shows)
 
 1. Go to **Settings → Import Lists → +**
-2. Choose **Custom Lists → Sonarr Lists**
+2. Choose **Custom List**
 3. Set **URL** to: `https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_shows_sonarr.json`
-4. Set **JSON Path** to: `$`
-5. Click **Test** and then **Save**
+4. Click **Test** and then **Save**
+
+> **Note:** Sonarr caches import lists for up to 6 hours. If you test and get "0 results", try deleting and recreating the list to force an immediate refresh. The list syncs automatically every 5 minutes after that.
 
 ## 📄 Example JSON Output
 
-**Movies:**
+**Movies (StevenLu format):**
 ```json
 [
   {
     "title": "Project Hail Mary",
-    "tmdb_id": 687163,
-    "imdb_id": "tt12042730",
-    "release_date": "2026-03-15",
-    "genres": ["Science Fiction", "Adventure"],
-    "budget": 200000000,
-    "revenue": 640469765,
-    "rating": 8.203,
-    "votes": 1960,
-    "popularity": 118.09,
-    "poster_url": "https://image.tmdb.org/t/p/w500/...",
-    "overview": "Science teacher Ryland Grace wakes up..."
+    "imdb_id": "tt12042730"
+  },
+  {
+    "title": "Hoppers",
+    "imdb_id": "tt26443616"
   }
 ]
 ```
 
-TV Shows:
+TV Shows (Sonarr Custom List format):
 
 ```json
 [
-  {
-    "title": "The Last of Us",
-    "tmdb_id": 100088,
-    "first_air_date": "2026-01-15",
-    "networks": ["HBO"],
-    "rating": 8.8,
-    "votes": 8500,
-    "poster_url": "https://image.tmdb.org/t/p/w500/...",
-    "overview": "Joel and Ellie..."
-  }
+  {"TvdbId": 371572},
+  {"TvdbId": 433631},
+  {"TvdbId": 446831}
 ]
 ```
 

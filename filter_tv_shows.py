@@ -32,11 +32,15 @@ if not API_KEY:
 OUTPUT_FILE = "filtered_tv_shows_sonarr.json"
 
 PRESTIGE_NETWORKS = [
-    "HBO", "Netflix", "Apple TV+", "Amazon", "Disney+",
-    "Paramount+", "Max", "Hulu", "Peacock", "Showtime",
-    "Starz", "AMC", "FX", "National Geographic",
-    "BBC One", "Sky Atlantic", "Canal+", "ZDF", "Arte",
-    "Viaplay", "TV4", "SVT", "NRK", "DR", "YLE"
+    "HBO",
+    "Netflix",
+    "Apple TV+",
+    "Amazon",
+    "Disney+",
+    "Paramount+",
+    "Max",
+    "Hulu",
+    "National Geographic",
 ]
 
 BASE_URL = "https://api.themoviedb.org/3"
@@ -173,7 +177,6 @@ def fetch_and_filter_shows(tv_ids):
     if skipped_no_tvdb > 0:
         print(f"\n  ℹ️  {skipped_no_tvdb} show(s) skipped due to missing TVDB ID")
 
-    # Sort by TVDB ID for consistent output
     filtered.sort(key=lambda x: x.get("TvdbId", 0))
     return filtered
 
@@ -187,6 +190,7 @@ def main():
     print()
     print(f"Date filter:    {current_year}-01-01 onwards")
     print(f"Network filter: {len(PRESTIGE_NETWORKS)} prestige networks/streamers")
+    print(f"Networks:       {', '.join(PRESTIGE_NETWORKS)}")
     print()
 
     print("Fetching TV shows from TMDb...")
@@ -202,14 +206,6 @@ def main():
     print(f"\nDone!")
     print(f"  Sonarr-ready: {OUTPUT_FILE}")
     print(f"  Shows found:  {len(shows)}")
-    print(f"\n  ℹ️  DEBUG: First 5 TVDB IDs: {[s['TvdbId'] for s in shows[:5]]}")
-
-    # Also write a simple count file for debugging
-    with open("sonarr_debug.txt", "w") as f:
-        f.write(f"Total shows: {len(shows)}\n")
-        f.write(f"First 10 TVDB IDs: {[s['TvdbId'] for s in shows[:10]]}\n")
-        if shows:
-            f.write(f"Last 5 TVDB IDs: {[s['TvdbId'] for s in shows[-5:]]}\n")
 
 
 if __name__ == "__main__":

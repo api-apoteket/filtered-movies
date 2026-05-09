@@ -24,12 +24,8 @@ Every TV show that premiered this year on a major network or streaming service.
 **Current networks:**
 | Network | Type |
 |---------|------|
-| Netflix | Streaming |
 | Amazon | Streaming (Prime Video) |
-| Disney+ | Streaming |
-| Paramount+ | Streaming (CBS, Showtime, Nickelodeon, MTV) |
 | HBO / Max | Premium TV & Streaming |
-| Hulu | Streaming (FX, originals) |
 | Apple TV+ | Premium Streaming |
 | National Geographic | Documentary & Factual |
 

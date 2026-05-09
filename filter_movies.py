@@ -5,9 +5,11 @@ Fetch movies from TMDb and filter by budget only.
 Filter:
   - Budget >= $100,000,000 (regardless of rating)
   - Released this year up to today
+  - Must have an IMDb ID (required by Radarr's StevenLu Custom list)
 
-Output:
-  - filtered_movies_radarr.json (Radarr-compatible pure array)
+Outputs:
+  - filtered_movies_radarr.json    (Radarr StevenLu Custom compatible)
+  - filtered_movies_full.json      (Full metadata for reference)
 
 Required environment variable:
   TMDB_API_KEY - Your TMDb API Read Access Token (starts with "eyJ...")
@@ -28,7 +30,8 @@ if not API_KEY:
     print("ERROR: Environment variable TMDB_API_KEY is not set.")
     sys.exit(1)
 
-OUTPUT_FILE = "filtered_movies_radarr.json"
+OUTPUT_FILE_RADARR = "filtered_movies_radarr.json"
+OUTPUT_FILE_FULL = "filtered_movies_full.json"
 MIN_BUDGET = 100_000_000  # $100M
 
 BASE_URL = "https://api.themoviedb.org/3"
@@ -68,14 +71,14 @@ def get_movie_ids(pages=15):
                         movie_ids.add(movie["id"])
                 elif response.status_code == 429:
                     time.sleep(2)
-            except requests.exceptions.RequestException:
+            except Exception:
                 time.sleep(1)
 
     return list(movie_ids)
 
 
-def simplify_movie(movie):
-    """Create a simplified movie object."""
+def simplify_movie_full(movie):
+    """Create a full movie object (for reference)."""
     poster = movie.get("poster_path")
     return {
         "title": movie.get("title"),
@@ -93,9 +96,25 @@ def simplify_movie(movie):
     }
 
 
+def simplify_movie_radarr(movie):
+    """
+    Create a minimal movie object for Radarr's StevenLu Custom list.
+    Must have title and imdb_id. Returns None if no IMDb ID.
+    """
+    imdb_id = movie.get("imdb_id")
+    if not imdb_id:
+        return None
+    return {
+        "title": movie.get("title"),
+        "imdb_id": imdb_id
+    }
+
+
 def fetch_and_filter_movies(movie_ids):
-    """Fetch details and keep only big budget movies from this year."""
-    filtered = []
+    """Fetch details and keep only big budget movies from this year with IMDb ID."""
+    filtered_full = []
+    filtered_radarr = []
+    skipped_no_imdb = 0
     current_year = datetime.now().year
     today_str = datetime.now().strftime("%Y-%m-%d")
     start_date_str = f"{current_year}-01-01"
@@ -122,15 +141,28 @@ def fetch_and_filter_movies(movie_ids):
                 continue
 
             if budget >= MIN_BUDGET:
-                simplified = simplify_movie(movie)
-                filtered.append(simplified)
-                print(f"  💰 {movie.get('title')} ({release_date}) - ${budget:,}")
+                # Full version always saved
+                filtered_full.append(simplify_movie_full(movie))
+
+                # Radarr version only if IMDb ID exists
+                radarr_obj = simplify_movie_radarr(movie)
+                if radarr_obj:
+                    filtered_radarr.append(radarr_obj)
+                    print(f"  💰 {movie.get('title')} ({release_date}) - ${budget:,}")
+                else:
+                    skipped_no_imdb += 1
+                    print(f"  ⚠️  {movie.get('title')} ({release_date}) - ${budget:,} [SKIPPED: No IMDb ID]")
 
         except Exception:
             pass
 
-    filtered.sort(key=lambda x: x.get("release_date", ""), reverse=True)
-    return filtered
+    if skipped_no_imdb > 0:
+        print(f"\n  ℹ️  {skipped_no_imdb} movie(s) skipped due to missing IMDb ID")
+
+    filtered_full.sort(key=lambda x: x.get("release_date", ""), reverse=True)
+    filtered_radarr.sort(key=lambda x: x.get("title", ""))
+
+    return filtered_full, filtered_radarr
 
 
 def main():
@@ -142,12 +174,17 @@ def main():
     movie_ids = get_movie_ids(pages=10)
     print(f"Found {len(movie_ids)} movies to evaluate.\n")
 
-    movies = fetch_and_filter_movies(movie_ids)
+    movies_full, movies_radarr = fetch_and_filter_movies(movie_ids)
 
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        json.dump(movies, f, indent=2, ensure_ascii=False)
+    with open(OUTPUT_FILE_RADARR, "w", encoding="utf-8") as f:
+        json.dump(movies_radarr, f, indent=2, ensure_ascii=False)
 
-    print(f"\nDone! {len(movies)} movies saved to {OUTPUT_FILE}")
+    with open(OUTPUT_FILE_FULL, "w", encoding="utf-8") as f:
+        json.dump(movies_full, f, indent=2, ensure_ascii=False)
+
+    print(f"\nDone!")
+    print(f"  Radarr-ready: {OUTPUT_FILE_RADARR} ({len(movies_radarr)} movies)")
+    print(f"  Full metadata: {OUTPUT_FILE_FULL} ({len(movies_full)} movies)")
 
 
 if __name__ == "__main__":

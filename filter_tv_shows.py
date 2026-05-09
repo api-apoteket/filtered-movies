@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-Fetch TV shows from TMDb and filter by prestige networks only.
+Fetch TV shows from TMDb and filter by prestige networks + quality.
 
 Filter:
   - Shows from major networks/streamers (proxy for high budget)
   - Premiered this year onwards
+  - Rating >= 6.5
+  - Vote count >= 50,000
   - Must have a TVDB ID (required by Sonarr Custom List)
 
 Output:
@@ -43,6 +45,9 @@ PRESTIGE_NETWORKS = [
     "National Geographic",
 ]
 
+MIN_RATING = 6.5
+MIN_VOTES = 50000
+
 BASE_URL = "https://api.themoviedb.org/3"
 HEADERS = {
     "accept": "application/json",
@@ -65,7 +70,7 @@ def get_tv_show_ids(pages=15):
 
     discover_endpoints = [
         f"/discover/tv?sort_by=popularity.desc&first_air_date.gte={start_date_str}",
-        f"/discover/tv?sort_by=vote_average.desc&first_air_date.gte={start_date_str}&vote_count.gte=10",
+        f"/discover/tv?sort_by=vote_average.desc&first_air_date.gte={start_date_str}&vote_count.gte={MIN_VOTES}",
         f"/discover/tv?sort_by=first_air_date.desc&first_air_date.gte={start_date_str}",
     ]
 
@@ -132,6 +137,8 @@ def fetch_and_filter_shows(tv_ids):
     current_year = datetime.now().year
     start_date_str = f"{current_year}-01-01"
     skipped_no_tvdb = 0
+    skipped_rating = 0
+    skipped_votes = 0
 
     for i, tv_id in enumerate(tv_ids):
         if i % 100 == 0:
@@ -158,6 +165,21 @@ def fetch_and_filter_shows(tv_ids):
             if not is_prestige_show(show):
                 continue
 
+            rating = show.get("vote_average", 0)
+            votes = show.get("vote_count", 0)
+
+            if rating < MIN_RATING:
+                skipped_rating += 1
+                networks_str = ", ".join([n["name"] for n in show.get("networks", [])])
+                print(f"  ⭐ {show.get('name')} ({first_air}) - {networks_str} - Rating {rating} [Too low - skipped]")
+                continue
+
+            if votes < MIN_VOTES:
+                skipped_votes += 1
+                networks_str = ", ".join([n["name"] for n in show.get("networks", [])])
+                print(f"  📊 {show.get('name')} ({first_air}) - {networks_str} - {votes:,} votes [Not enough votes - skipped]")
+                continue
+
             tvdb_id = get_tvdb_id(tv_id)
             if not tvdb_id:
                 skipped_no_tvdb += 1
@@ -167,7 +189,7 @@ def fetch_and_filter_shows(tv_ids):
 
             filtered.append({"TvdbId": tvdb_id})
             networks_str = ", ".join([n["name"] for n in show.get("networks", [])])
-            print(f"  🎬 {show.get('name')} ({first_air}) - {networks_str} - TVDB: {tvdb_id}")
+            print(f"  🎬 {show.get('name')} ({first_air}) - {networks_str} - {rating}★ ({votes:,} votes) - TVDB: {tvdb_id}")
 
         except requests.exceptions.RequestException as e:
             print(f"  Request failed for TV show {tv_id}: {e}")
@@ -175,7 +197,11 @@ def fetch_and_filter_shows(tv_ids):
             print(f"  Unexpected error for TV show {tv_id}: {e}")
 
     if skipped_no_tvdb > 0:
-        print(f"\n  ℹ️  {skipped_no_tvdb} show(s) skipped due to missing TVDB ID")
+        print(f"\n  ℹ️  {skipped_no_tvdb} show(s) skipped: No TVDB ID")
+    if skipped_rating > 0:
+        print(f"  ℹ️  {skipped_rating} show(s) skipped: Rating below {MIN_RATING}")
+    if skipped_votes > 0:
+        print(f"  ℹ️  {skipped_votes} show(s) skipped: Fewer than {MIN_VOTES:,} votes")
 
     filtered.sort(key=lambda x: x.get("TvdbId", 0))
     return filtered
@@ -189,15 +215,16 @@ def main():
     print("=" * 55)
     print()
     print(f"Date filter:    {current_year}-01-01 onwards")
-    print(f"Network filter: {len(PRESTIGE_NETWORKS)} prestige networks/streamers")
-    print(f"Networks:       {', '.join(PRESTIGE_NETWORKS)}")
+    print(f"Network filter: {len(PRESTIGE_NETWORKS)} prestige networks")
+    print(f"Rating filter:  >= {MIN_RATING}")
+    print(f"Votes filter:   >= {MIN_VOTES:,}")
     print()
 
     print("Fetching TV shows from TMDb...")
     tv_ids = get_tv_show_ids(pages=10)
     print(f"Found {len(tv_ids)} unique TV shows to evaluate.\n")
 
-    print("Filtering and fetching TVDB IDs...")
+    print("Filtering...")
     shows = fetch_and_filter_shows(tv_ids)
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

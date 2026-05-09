@@ -1,16 +1,15 @@
-```markdown
 # 🎬 Filtered Movies & TV Shows
 
-Automatically updated lists of high-value movies and TV shows, powered by [The Movie Database (TMDb)](https://www.themoviedb.org/).
+Automatically updated lists of high-value movies and TV shows for Radarr and Sonarr, powered by [The Movie Database (TMDb)](https://www.themoviedb.org/).
 
 ## 📋 What This Provides
 
-Two separate JSON files, each updated daily via GitHub Actions:
+Two JSON files, updated daily via GitHub Actions, ready for direct import:
 
-| File | Content | Filter |
-|------|---------|--------|
-| [`filtered_movies.json`](filtered_movies.json) | Movies | Budget ≥ $100,000,000 |
-| [`filtered_tv_shows.json`](filtered_tv_shows.json) | TV Shows | Prestige networks/streamers |
+| File | For | Filter |
+|------|-----|--------|
+| `filtered_movies_radarr.json` | Radarr | Movies with budget ≥ $100,000,000 |
+| `filtered_tv_shows_sonarr.json` | Sonarr | TV shows from prestige networks/streamers |
 
 ### 💰 Movies – Big Budget Only
 
@@ -22,86 +21,81 @@ No rating requirements. A flop with a $200M budget qualifies just as much as an 
 
 Every TV show that premiered this year on a major network or streaming service.
 
-Prestige networks include: HBO, Netflix, Apple TV+, Amazon Prime Video, Disney+, Paramount+, Max, Hulu, Peacock, Showtime, Starz, AMC, FX, BBC One, Sky Atlantic, and more.
+Prestige networks include: HBO, Netflix, Apple TV+, Amazon Prime Video, Disney+, Paramount+, Max, Hulu, Peacock, Showtime, Starz, AMC, FX, BBC One, Sky Atlantic, Viaplay, SVT, TV4, NRK, DR, YLE, and more.
 
 No rating requirements. If it's on a serious platform, it's on the list.
 
-## 🚀 Usage
+## 🚀 Direct URLs for Radarr & Sonarr
 
-### Direct JSON Access
-
-**Movies (for Radarr):**
+**Radarr (Movies):**
 ```
 
-https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_movies.json
-
-```
-
-**TV Shows (for Sonarr):**
-```
-
-https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_shows.json
+https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_movies_radarr.json
 
 ```
 
-### JSON Structure
+**Sonarr (TV Shows):**
+```
+
+https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_shows_sonarr.json
+
+```
+
+## 🎯 Radarr & Sonarr Setup
+
+### Radarr (Movies)
+
+1. Go to **Settings → Import Lists → +**
+2. Choose **Custom Lists → Radarr Lists**
+3. Set **URL** to: `https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_movies_radarr.json`
+4. Set **JSON Path** to: `$`
+5. Click **Test** and then **Save**
+
+### Sonarr (TV Shows)
+
+1. Go to **Settings → Import Lists → +**
+2. Choose **Custom Lists → Sonarr Lists**
+3. Set **URL** to: `https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_shows_sonarr.json`
+4. Set **JSON Path** to: `$`
+5. Click **Test** and then **Save**
+
+## 📄 Example JSON Output
 
 **Movies:**
 ```json
-{
-  "metadata": {
-    "last_updated": "2026-05-08 19:05 UTC",
-    "date_range": "2026-01-01 to 2026-05-08",
-    "filter": {
-      "min_budget": 100000000,
-      "description": "Movies from 2026 with budget >= $100,000,000"
-    },
-    "count": 17
-  },
-  "movies": [
-    {
-      "title": "Project Hail Mary",
-      "tmdb_id": 687163,
-      "imdb_id": "tt12042730",
-      "release_date": "2026-03-15",
-      "genres": ["Science Fiction", "Adventure"],
-      "budget": 200000000,
-      "revenue": 640469765,
-      "rating": 8.203,
-      "votes": 1960,
-      "poster_url": "https://image.tmdb.org/t/p/w500/...",
-      "overview": "Science teacher Ryland Grace wakes up..."
-    }
-  ]
-}
+[
+  {
+    "title": "Project Hail Mary",
+    "tmdb_id": 687163,
+    "imdb_id": "tt12042730",
+    "release_date": "2026-03-15",
+    "genres": ["Science Fiction", "Adventure"],
+    "budget": 200000000,
+    "revenue": 640469765,
+    "rating": 8.203,
+    "votes": 1960,
+    "popularity": 118.09,
+    "poster_url": "https://image.tmdb.org/t/p/w500/...",
+    "overview": "Science teacher Ryland Grace wakes up..."
+  }
+]
 ```
 
 TV Shows:
 
 ```json
-{
-  "metadata": {
-    "last_updated": "2026-05-08 19:05 UTC",
-    "date_range": "2026-01-01 to 2026-05-08",
-    "filter": {
-      "prestige_networks": ["HBO", "Netflix", "Apple TV+", "..."],
-      "description": "TV shows from 2026 on major networks/streamers"
-    },
-    "count": 12
-  },
-  "shows": [
-    {
-      "title": "The Last of Us",
-      "tmdb_id": 100088,
-      "first_air_date": "2026-01-15",
-      "networks": ["HBO"],
-      "rating": 8.8,
-      "votes": 8500,
-      "poster_url": "https://image.tmdb.org/t/p/w500/...",
-      "overview": "Joel and Ellie..."
-    }
-  ]
-}
+[
+  {
+    "title": "The Last of Us",
+    "tmdb_id": 100088,
+    "first_air_date": "2026-01-15",
+    "networks": ["HBO"],
+    "rating": 8.8,
+    "votes": 8500,
+    "poster_url": "https://image.tmdb.org/t/p/w500/...",
+    "overview": "Joel and Ellie..."
+  }
+]
 ```
 
 🔧 Run Locally
@@ -118,66 +112,37 @@ On the TMDb API settings page, you'll see two values:
 · API Key – a short string like a1b2c3d4e5... ← Do NOT use this
 · API Read Access Token – a long string starting with eyJ... ← USE THIS ONE
 
-The scripts use Bearer token authentication which requires the Read Access Token.
-
 Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/api-apoteket/filtered-movies.git
 cd filtered-movies
-
-# Install dependencies
 pip install requests
-
-# Set your API token
 export TMDB_API_KEY="your_read_access_token_here"
-
-# Generate movie list
 python3 filter_movies.py
-
-# Generate TV show list
 python3 filter_tv_shows.py
 ```
 
 🤖 Automated Updates
 
-This repository uses GitHub Actions to automatically regenerate both lists daily:
+This repository uses GitHub Actions to regenerate both lists daily:
 
-Workflow Runs at Updates
-update-movies.yml 06:00 UTC daily filtered_movies.json
-update-tv-shows.yml 07:00 UTC daily filtered_tv_shows.json
+Workflow Runs at Output
+update-movies.yml 06:00 UTC filtered_movies_radarr.json
+update-tv-shows.yml 07:00 UTC filtered_tv_shows_sonarr.json
 
 To enable this in your own fork, add your TMDb token as a repository secret:
 
 Secret Name Value
 TMDB_API_KEY Your TMDb API Read Access Token
 
-🎯 Radarr & Sonarr Setup
-
-Radarr (Movies)
-
-1. Go to Settings → Import Lists → +
-2. Choose Custom Lists → Radarr Lists
-3. Set URL to: https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_movies.json
-4. Set JSON Path to: $.movies
-5. Configure auto-add settings as desired
-
-Sonarr (TV Shows)
-
-1. Go to Settings → Import Lists → +
-2. Choose Custom Lists → Sonarr Lists
-3. Set URL to: https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_shows.json
-4. Set JSON Path to: $.shows
-5. Configure auto-add settings as desired
-
 📊 Data Source
 
-All movie and TV show data comes from The Movie Database (TMDb). This product uses the TMDb API but is not endorsed or certified by TMDb.
+All data from TMDb. This product uses the TMDb API but is not endorsed or certified by TMDb.
 
 📄 License
 
-MIT – See [MIT License](LICENSE) for details.
+MIT – See LICENSE for details.
 
 🙏 Attribution
 

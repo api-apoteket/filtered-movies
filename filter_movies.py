@@ -5,10 +5,9 @@ Fetch movies from TMDb and filter by budget only.
 Filter:
   - Budget >= $100,000,000 (regardless of rating)
   - Released this year up to today
-  - Must have an IMDb ID (required by Radarr's StevenLu Custom list)
 
 Outputs:
-  - filtered_movies_radarr.json    (Radarr StevenLu Custom compatible)
+  - filtered_movies_radarr.json    (Radarr Custom List compatible)
   - filtered_movies_full.json      (Full metadata for reference)
 
 Required environment variable:
@@ -98,23 +97,25 @@ def simplify_movie_full(movie):
 
 def simplify_movie_radarr(movie):
     """
-    Create a minimal movie object for Radarr's StevenLu Custom list.
-    Must have title and imdb_id. Returns None if no IMDb ID.
+    Create a movie object for Radarr Custom List.
+    Radarr Custom Lists expect: tmdbId, imdbId, title, year (optional).
+    At minimum, tmdbId or imdbId is required.
     """
-    imdb_id = movie.get("imdb_id")
-    if not imdb_id:
-        return None
+    release_date = movie.get("release_date", "")
+    year = int(release_date[:4]) if release_date and release_date[:4].isdigit() else 0
+
     return {
         "title": movie.get("title"),
-        "imdb_id": imdb_id
+        "tmdbId": movie.get("id"),
+        "imdbId": movie.get("imdb_id"),
+        "year": year
     }
 
 
 def fetch_and_filter_movies(movie_ids):
-    """Fetch details and keep only big budget movies from this year with IMDb ID."""
+    """Fetch details and keep only big budget movies from this year."""
     filtered_full = []
     filtered_radarr = []
-    skipped_no_imdb = 0
     current_year = datetime.now().year
     today_str = datetime.now().strftime("%Y-%m-%d")
     start_date_str = f"{current_year}-01-01"
@@ -141,23 +142,12 @@ def fetch_and_filter_movies(movie_ids):
                 continue
 
             if budget >= MIN_BUDGET:
-                # Full version always saved
                 filtered_full.append(simplify_movie_full(movie))
-
-                # Radarr version only if IMDb ID exists
-                radarr_obj = simplify_movie_radarr(movie)
-                if radarr_obj:
-                    filtered_radarr.append(radarr_obj)
-                    print(f"  💰 {movie.get('title')} ({release_date}) - ${budget:,}")
-                else:
-                    skipped_no_imdb += 1
-                    print(f"  ⚠️  {movie.get('title')} ({release_date}) - ${budget:,} [SKIPPED: No IMDb ID]")
+                filtered_radarr.append(simplify_movie_radarr(movie))
+                print(f"  💰 {movie.get('title')} ({release_date}) - ${budget:,}")
 
         except Exception:
             pass
-
-    if skipped_no_imdb > 0:
-        print(f"\n  ℹ️  {skipped_no_imdb} movie(s) skipped due to missing IMDb ID")
 
     filtered_full.sort(key=lambda x: x.get("release_date", ""), reverse=True)
     filtered_radarr.sort(key=lambda x: x.get("title", ""))
@@ -167,7 +157,7 @@ def fetch_and_filter_movies(movie_ids):
 
 def main():
     print("=" * 50)
-    print("BIG BUDGET MOVIES FOR RADARR")
+    print("BIG BUDGET MOVIES FOR RADARR CUSTOM LIST")
     print("=" * 50)
     print()
 

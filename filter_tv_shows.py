@@ -6,7 +6,7 @@ Filter:
   - Shows from major networks/streamers (proxy for high budget)
   - Premiered this year onwards
   - Rating >= 6.5
-  - Vote count >= 50,000
+  - Vote count >= 5,000
   - Must have a TVDB ID (required by Sonarr Custom List)
 
 Output:
@@ -46,7 +46,7 @@ PRESTIGE_NETWORKS = [
 ]
 
 MIN_RATING = 6.5
-MIN_VOTES = 50000
+MIN_VOTES = 5000  # 5,000 votes (more realistic for new shows)
 
 BASE_URL = "https://api.themoviedb.org/3"
 HEADERS = {
@@ -70,7 +70,7 @@ def get_tv_show_ids(pages=15):
 
     discover_endpoints = [
         f"/discover/tv?sort_by=popularity.desc&first_air_date.gte={start_date_str}",
-        f"/discover/tv?sort_by=vote_average.desc&first_air_date.gte={start_date_str}&vote_count.gte={MIN_VOTES}",
+        f"/discover/tv?sort_by=vote_average.desc&first_air_date.gte={start_date_str}&vote_count.gte=1000",
         f"/discover/tv?sort_by=first_air_date.desc&first_air_date.gte={start_date_str}",
     ]
 
@@ -171,20 +171,20 @@ def fetch_and_filter_shows(tv_ids):
             if rating < MIN_RATING:
                 skipped_rating += 1
                 networks_str = ", ".join([n["name"] for n in show.get("networks", [])])
-                print(f"  ⭐ {show.get('name')} ({first_air}) - {networks_str} - Rating {rating} [Too low - skipped]")
+                print(f"  ⭐ {show.get('name')} ({first_air}) - {networks_str} - Rating {rating} [Too low]")
                 continue
 
             if votes < MIN_VOTES:
                 skipped_votes += 1
                 networks_str = ", ".join([n["name"] for n in show.get("networks", [])])
-                print(f"  📊 {show.get('name')} ({first_air}) - {networks_str} - {votes:,} votes [Not enough votes - skipped]")
+                print(f"  📊 {show.get('name')} ({first_air}) - {networks_str} - {votes:,} votes [Not enough]")
                 continue
 
             tvdb_id = get_tvdb_id(tv_id)
             if not tvdb_id:
                 skipped_no_tvdb += 1
                 networks_str = ", ".join([n["name"] for n in show.get("networks", [])])
-                print(f"  ⚠️  {show.get('name')} ({first_air}) - {networks_str} [No TVDB ID - skipped]")
+                print(f"  ⚠️  {show.get('name')} ({first_air}) - {networks_str} [No TVDB ID]")
                 continue
 
             filtered.append({"TvdbId": tvdb_id})

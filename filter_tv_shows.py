@@ -33,10 +33,13 @@ OUTPUT_FILE = "filtered_tv_shows_sonarr.json"
 
 PRESTIGE_NETWORKS = [
     "HBO",
+    "Max",
     "Apple TV+",
+    "Apple TV",
     "National Geographic",
     "Amazon",
-    "Max",
+    "Prime Video",
+    "Amazon Prime Video",
 ]
 
 BASE_URL = "https://api.themoviedb.org/3"

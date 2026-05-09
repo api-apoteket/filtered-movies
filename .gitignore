@@ -52,5 +52,5 @@ filtered_tv_shows_sonarr.json
 
 # ===== Keep the generated files in Git? Remove these lines if you DO want them tracked =====
 # The workflow commits them, so they need to be tracked. Commented out for safety.
-# !filtered_movies_radarr.json
-# !filtered_tv_shows_sonarr.json
+!filtered_movies_radarr.json
+!filtered_tv_shows_sonarr.json

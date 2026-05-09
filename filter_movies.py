@@ -7,7 +7,7 @@ Filter:
   - Released this year up to today
 
 Output:
-  - filtered_movies_radarr.json    (Radarr Custom List compatible - tmdbId + imdbId only)
+  - filtered_movies_radarr.json    (StevenLu Custom format: title + imdb_id)
 
 Required environment variable:
   TMDB_API_KEY - Your TMDb API Read Access Token (starts with "eyJ...")
@@ -74,20 +74,21 @@ def get_movie_ids(pages=15):
     return list(movie_ids)
 
 
-def simplify_movie_radarr(movie):
-    """
-    Minimal object for Radarr Custom List.
-    Only tmdbId and imdbId. No title, no year, no extra fields.
-    """
+def simplify_movie_stevenlu(movie):
+    """Create a StevenLu-compatible movie object (title + imdb_id)."""
+    imdb_id = movie.get("imdb_id")
+    if not imdb_id:
+        return None
     return {
-        "tmdbId": movie.get("id"),
-        "imdbId": movie.get("imdb_id")
+        "title": movie.get("title"),
+        "imdb_id": imdb_id
     }
 
 
 def fetch_and_filter_movies(movie_ids):
     """Fetch details and keep only big budget movies from this year."""
     filtered = []
+    skipped_no_imdb = 0
     current_year = datetime.now().year
     today_str = datetime.now().strftime("%Y-%m-%d")
     start_date_str = f"{current_year}-01-01"
@@ -114,12 +115,21 @@ def fetch_and_filter_movies(movie_ids):
                 continue
 
             if budget >= MIN_BUDGET:
-                filtered.append(simplify_movie_radarr(movie))
-                print(f"  💰 {movie.get('title')} ({release_date}) - ${budget:,}")
+                stevenlu = simplify_movie_stevenlu(movie)
+                if stevenlu:
+                    filtered.append(stevenlu)
+                    print(f"  💰 {movie.get('title')} ({release_date}) - ${budget:,}")
+                else:
+                    skipped_no_imdb += 1
+                    print(f"  ⚠️  {movie.get('title')} ({release_date}) - ${budget:,} [SKIPPED: No IMDb ID]")
 
         except Exception:
             pass
 
+    if skipped_no_imdb > 0:
+        print(f"\n  ℹ️  {skipped_no_imdb} movie(s) skipped due to missing IMDb ID")
+
+    filtered.sort(key=lambda x: x.get("title", ""))
     return filtered
 
 
@@ -128,7 +138,7 @@ def main():
     today_str = datetime.now().strftime("%Y-%m-%d")
 
     print("=" * 55)
-    print("BIG BUDGET MOVIES FOR RADARR CUSTOM LIST")
+    print("BIG BUDGET MOVIES FOR RADARR (StevenLu)")
     print("=" * 55)
     print()
     print(f"Date filter:   {current_year}-01-01 to {today_str}")

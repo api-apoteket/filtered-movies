@@ -4,11 +4,11 @@ Fetch TV shows from TMDb and filter by prestige networks only.
 
 Filter:
   - Shows from major networks/streamers (proxy for high budget)
-  - Premiered this year (2026) onwards
+  - Premiered this year onwards
   - Must have a TVDB ID (required by Sonarr Custom List)
 
 Output:
-  - filtered_tv_shows_sonarr.json    (Sonarr Custom List compatible - TvdbId only)
+  - filtered_tv_shows_sonarr.json    (Sonarr Custom List: TvdbId only)
 
 Required environment variable:
   TMDB_API_KEY - Your TMDb API Read Access Token (starts with "eyJ...")
@@ -91,11 +91,8 @@ def get_tv_show_ids(pages=15):
                     sys.exit(1)
                 elif response.status_code == 429:
                     time.sleep(2)
-                else:
-                    print(f"WARNING: Could not fetch {url} (HTTP {response.status_code})")
 
-            except requests.exceptions.RequestException as e:
-                print(f"WARNING: Request failed for {url}: {e}")
+            except requests.exceptions.RequestException:
                 time.sleep(1)
 
     return list(tv_ids)
@@ -117,21 +114,15 @@ def get_tvdb_id(tmdb_id):
 def is_prestige_show(show):
     """Check if a show is from a prestige network/streamer."""
     networks = [net.get("name", "") for net in show.get("networks", [])]
-
     for network in networks:
         for prestige in PRESTIGE_NETWORKS:
             if prestige.lower() in network.lower():
                 return True
-
     return False
 
 
 def fetch_and_filter_shows(tv_ids):
-    """
-    Fetch details for each TV show.
-    Only keep prestige shows from this year onwards with TVDB ID.
-    Returns list of Sonarr-compatible objects (TvdbId only).
-    """
+    """Fetch details for each TV show. Returns list of {TvdbId: ...}."""
     filtered = []
     total = len(tv_ids)
     current_year = datetime.now().year
@@ -180,8 +171,10 @@ def fetch_and_filter_shows(tv_ids):
             print(f"  Unexpected error for TV show {tv_id}: {e}")
 
     if skipped_no_tvdb > 0:
-        print(f"\n  {skipped_no_tvdb} show(s) skipped due to missing TVDB ID")
+        print(f"\n  ℹ️  {skipped_no_tvdb} show(s) skipped due to missing TVDB ID")
 
+    # Sort by TVDB ID for consistent output
+    filtered.sort(key=lambda x: x.get("TvdbId", 0))
     return filtered
 
 
@@ -203,14 +196,20 @@ def main():
     print("Filtering and fetching TVDB IDs...")
     shows = fetch_and_filter_shows(tv_ids)
 
-    shows.sort(key=lambda x: x.get("TvdbId", 0))
-
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(shows, f, indent=2, ensure_ascii=False)
 
     print(f"\nDone!")
     print(f"  Sonarr-ready: {OUTPUT_FILE}")
     print(f"  Shows found:  {len(shows)}")
+    print(f"\n  ℹ️  DEBUG: First 5 TVDB IDs: {[s['TvdbId'] for s in shows[:5]]}")
+
+    # Also write a simple count file for debugging
+    with open("sonarr_debug.txt", "w") as f:
+        f.write(f"Total shows: {len(shows)}\n")
+        f.write(f"First 10 TVDB IDs: {[s['TvdbId'] for s in shows[:10]]}\n")
+        if shows:
+            f.write(f"Last 5 TVDB IDs: {[s['TvdbId'] for s in shows[-5:]]}\n")
 
 
 if __name__ == "__main__":

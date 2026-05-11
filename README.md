@@ -1,3 +1,5 @@
+![Downloads](https://img.shields.io/github/downloads/api-apoteket/filtered-movies/total)
+
 # 🎬 Filtered Movies & TV Shows
 
 Automatically updated lists of high-value movies and TV shows for Radarr and Sonarr, powered by [The Movie Database (TMDb)](https://www.themoviedb.org/).

@@ -106,6 +106,9 @@ def get_tvdb_id(tmdb_id):
     url = f"{BASE_URL}/tv/{tmdb_id}/external_ids"
     try:
         response = requests.get(url, headers=HEADERS, timeout=30)
+        if response.status_code == 429:
+            time.sleep(5)
+            response = requests.get(url, headers=HEADERS, timeout=30)
         if response.status_code == 200:
             tvdb_id = response.json().get("tvdb_id")
             return tvdb_id if tvdb_id else None
@@ -136,7 +139,7 @@ def fetch_and_filter_shows(tv_ids):
         if i % 10 == 0:
             print(f"  Processing show {i+1}/{total}...")
 
-        url = f"{BASE_URL}/tv/{tv_id}"
+        url = f"{BASE_URL}/tv/{tv_id}?append_to_response=external_ids"
 
         try:
             response = requests.get(url, headers=HEADERS, timeout=30)
@@ -157,7 +160,7 @@ def fetch_and_filter_shows(tv_ids):
             if not is_prestige_show(show):
                 continue
 
-            tvdb_id = get_tvdb_id(tv_id)
+            tvdb_id = show.get("external_ids", {}).get("tvdb_id")
             if not tvdb_id:
                 skipped_no_tvdb += 1
                 continue

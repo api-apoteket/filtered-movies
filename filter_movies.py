@@ -123,8 +123,8 @@ def fetch_and_filter_movies(movie_ids):
                     skipped_no_imdb += 1
                     print(f"  ⚠️  {movie.get('title')} ({release_date}) - ${budget:,} [SKIPPED: No IMDb ID]")
 
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  Error fetching movie {movie_id}: {e}")
 
     if skipped_no_imdb > 0:
         print(f"\n  ℹ️  {skipped_no_imdb} movie(s) skipped due to missing IMDb ID")

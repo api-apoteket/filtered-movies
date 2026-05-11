@@ -43,7 +43,7 @@ jobs:
             PR_URL=$(gh pr create --title "Update filtered TV shows $(date +%Y-%m-%d)" \
               --body "Automated daily TMDB update." \
               --base main --head "$BRANCH")
-            gh pr merge --auto --squash --delete-branch "$PR_URL"
+            gh pr merge --squash --delete-branch "$PR_URL"
           else
             echo "No changes to commit"
           fi

@@ -1,4 +1,4 @@
-![Downloads](https://img.shields.io/github/downloads/api-apoteket/filtered-movies/total)
+![Downloads](https://img.shields.io/github/downloads/blixten85/filtered-movies/total)
 
 # 🎬 Filtered Movies & TV Shows
 
@@ -38,14 +38,14 @@ No rating requirements. If it's on a top-tier platform, it's on the list.
 **Radarr (StevenLu Custom):**
 ```
 
-https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_movies_radarr.json
+https://raw.githubusercontent.com/blixten85/filtered-movies/main/filtered_movies_radarr.json
 
 ```
 
 **Sonarr (Custom List):**
 ```
 
-https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_shows_sonarr.json
+https://raw.githubusercontent.com/blixten85/filtered-movies/main/filtered_tv_shows_sonarr.json
 
 ```
 
@@ -55,14 +55,14 @@ https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_
 
 1. Go to **Settings → Import Lists → +**
 2. Choose **StevenLu Custom**
-3. Set **URL** to: `https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_movies_radarr.json`
+3. Set **URL** to: `https://raw.githubusercontent.com/blixten85/filtered-movies/main/filtered_movies_radarr.json`
 4. Click **Test** and then **Save**
 
 ### Sonarr (TV Shows)
 
 1. Go to **Settings → Import Lists → +**
 2. Choose **Custom List**
-3. Set **URL** to: `https://raw.githubusercontent.com/api-apoteket/filtered-movies/main/filtered_tv_shows_sonarr.json`
+3. Set **URL** to: `https://raw.githubusercontent.com/blixten85/filtered-movies/main/filtered_tv_shows_sonarr.json`
 4. Click **Test** and then **Save**
 
 > **Note:** Sonarr caches import lists for up to 6 hours. If you test and get "0 results", try deleting and recreating the list to force an immediate refresh. The list syncs automatically every 5 minutes after that.
@@ -110,7 +110,7 @@ On the TMDb API settings page, you'll see two values:
 Setup
 
 ```bash
-git clone https://github.com/api-apoteket/filtered-movies.git
+git clone https://github.com/blixten85/filtered-movies.git
 cd filtered-movies
 pip install requests
 export TMDB_API_KEY="your_read_access_token_here"
